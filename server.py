@@ -5,20 +5,37 @@ import os
 from _thread import *
 
 
-def threaded_client(connection):
-    connection.send(str.encode('Welcome to the server\n'))
-    while True:
-        data = connection.recv(2048)
-        reply = 'Server says: ' + data.decode('utf-8')
-        if not data:
-            break
-        connection.sendall(str.encode(reply))
-    connection.close()
+PLAYERS = 0
+
+
+def is_login_incorrect(login):
+    if not login:
+        return True
+    if ' ' in login:
+        return True
+    return False
+
+
+def threaded_client(connection, player_num):
+    connection.send(str.encode('CONNECT'))
+    data = connection.recv(2048)
+    login = data.decode('utf-8')
+    if is_login_incorrect(login):
+        connection.send(str.encode('Error: invalid login'))
+        connection.close()
+        return
+
+    global PLAYERS
+    PLAYERS += 1
+    # print('Active players: ' + str(PLAYERS))
+
+    if PLAYERS == 2:
+        connection.send(str.encode('START'))
 
 
 HOST = '127.0.0.1'
-PORT = 12345
-thread_count = 0
+PORT = 54321
+player_number = 0
 server_socket = socket.socket()
 
 try:
@@ -26,16 +43,11 @@ try:
 except socket.error as e:
     print(str(e))
 
-print('Waiting for connection...')
 server_socket.listen(4)
 
 while True:
     client, address = server_socket.accept()
-    print('Connected to: ' + address[0] + ':' + str(address[1]))
-    start_new_thread(threaded_client, (client, ))
-    thread_count += 1
-    print('Thread number: ' + str(thread_count))
+    player_number += 1
+    start_new_thread(threaded_client, (client, player_number))
 
 server_socket.close()
-
-
