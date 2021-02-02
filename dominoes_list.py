@@ -1,4 +1,4 @@
-from domino import Domino
+from Domino import Domino
 import random
 
 

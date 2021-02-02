@@ -9,6 +9,10 @@ def parse(data):
         return 'PLAYER CHOICE'
     elif parsed_string[0] == 'ROUND':
         return 'ROUND'
+    elif parsed_string[0] == 'YOUR' and parsed_string[1] == 'MOVE':
+        return 'YOUR MOVE'
+    elif parsed_string[0] == 'PLAYER' and parsed_string[1] == 'MOVE':
+        return 'PLAYER MOVE'
     elif parsed_string[0] == 'STOP':
         return 'STOP'
     else:
@@ -31,7 +35,7 @@ def handle_round_choice(data):
     parsed_string = data.split(' ')
     del(parsed_string[0])
     available_dominoes = []
-    for domino_number in len(range(parsed_string)):
-        available_dominoes.append(parsed_string[domino_number])
+    for i in range(len(parsed_string)):
+        available_dominoes.append(parsed_string[i])
     print(available_dominoes)
     return available_dominoes
