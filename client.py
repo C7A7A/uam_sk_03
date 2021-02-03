@@ -17,7 +17,7 @@ response = receive(client_socket)
 print(response)
 send(client_socket, 'LOGIN 452648')
 
-available_choices = parse(receive(client_socket))
+available_choices = []
 x = 1
 
 run = True
@@ -26,7 +26,11 @@ while run:
     try:
         data = receive(client_socket)
         message = parse(data)
-        if message == 'YOUR CHOICE':
+        if message == 'OK':
+            print(message)
+        elif message == 'ERROR':
+            print(message)
+        elif message == 'YOUR CHOICE':
             print('CHOOSE ' + str(available_choices[0]))
             send(client_socket, 'CHOOSE ' + str(available_choices[0]))
         elif message == 'PLAYER CHOICE':
@@ -40,9 +44,13 @@ while run:
             send(client_socket, 'MOVE ' + str(x) + ' 0 0')
             x += 2
         elif message == 'PLAYER MOVE':
-            print('PLAYER MOVE')
+            print(message)
+        elif message == 'START':
+            available_choices = handle_start(data)
         elif message == 'GAME OVER RESULTS':
             run = False
+        elif message == 'UNKNOWN':
+            print(message)
     except socket.error as e:
         print(e)
 

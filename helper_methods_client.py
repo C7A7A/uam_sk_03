@@ -1,8 +1,10 @@
 def parse(data):
     parsed_string = data.split(' ')
     print(parsed_string)
-    if parsed_string[0] == 'START':
-        return parse_start(parsed_string)
+    if parsed_string[0] == 'OK':
+        return 'OK'
+    elif parsed_string[0] == 'ERROR':
+        return 'ERROR'
     elif parsed_string[0] == 'YOUR' and parsed_string[1] == 'CHOICE':
         return 'YOUR CHOICE'
     elif parsed_string[0] == 'PLAYER' and parsed_string[1] == 'CHOICE':
@@ -13,16 +15,19 @@ def parse(data):
         return 'YOUR MOVE'
     elif parsed_string[0] == 'PLAYER' and parsed_string[1] == 'MOVE':
         return 'PLAYER MOVE'
+    elif parsed_string[0] == 'START':
+        return 'START'
     elif parsed_string[0] == 'GAME':
         return 'GAME OVER RESULTS'
     else:
         return 'UNKNOWN'
 
 
-def parse_start(parsed):
-    del(parsed[0:4])
-    # print(parsed)
-    return parsed
+def handle_start(data):
+    parsed_string = data.split(' ')
+    del(parsed_string[0:6])
+    print(parsed_string)
+    return parsed_string
 
 
 def handle_player_choice(data):

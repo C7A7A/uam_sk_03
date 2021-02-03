@@ -8,7 +8,7 @@ def receive(conn):
 
 
 def send(conn, mess):
-    sleep(0.01)
+    sleep(0.02)
     try:
         conn.sendall(str.encode(mess))
     except socket.error as e:

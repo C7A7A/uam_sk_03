@@ -2,24 +2,54 @@ import random
 from helper_methods_communication import *
 
 
-def get_connection_and_login(server_socket):
-    conn, address = server_socket.accept()
-    send(conn, 'CONNECT')
-    login = receive(conn)
-    print(login)
-    if is_login_incorrect(login):
-        conn.close()
-        return
-    return conn
-
-
-def is_login_incorrect(login):
+def validate_login(login):
+    if 'LOGIN ' not in login:
+        return False
     login = login.replace('LOGIN ', '')
     if not login:
-        return True
+        return False
     if ' ' in login:
+        return False
+    return True
+
+
+def validate_choice(choice):
+    if 'CHOOSE ' not in choice:
+        return False
+    choice = choice.replace('CHOOSE ', '')
+    if not choice:
+        return False
+    parsed_choice = choice.split(' ')
+    print(parsed_choice)
+    print(parsed_choice[0])
+    if try_parse_to_int(parsed_choice[0]):
+        if int(parsed_choice[0]) in range(1, 49):
+            return True
+    return False
+
+
+def validate_move(move):
+    if 'MOVE ' not in move:
+        return False
+    move = move.replace('MOVE ', '')
+    if not move:
+        return False
+    parsed_move = move.split(' ')
+    if try_parse_to_int(parsed_move[0]) and try_parse_to_int(parsed_move[1]) and try_parse_to_int(parsed_move[2]):
+        if int(parsed_move[0]) not in range(-100, 100) or int(parsed_move[1]) not in range(-100, 100):
+            return False
+        if int(parsed_move[2]) not in [0, 90, 180, 270]:
+            return False
         return True
     return False
+
+
+def try_parse_to_int(data):
+    try:
+        int(data)
+        return True
+    except ValueError:
+        return False
 
 
 def shuffle_players(players):
