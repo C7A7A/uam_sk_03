@@ -13,8 +13,8 @@ def parse(data):
         return 'YOUR MOVE'
     elif parsed_string[0] == 'PLAYER' and parsed_string[1] == 'MOVE':
         return 'PLAYER MOVE'
-    elif parsed_string[0] == 'STOP':
-        return 'STOP'
+    elif parsed_string[0] == 'GAME':
+        return 'GAME OVER RESULTS'
     else:
         return 'UNKNOWN'
 

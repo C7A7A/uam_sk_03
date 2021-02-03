@@ -38,7 +38,7 @@ def get_players_order_string(players_order):
 def get_available_dominoes(dominoes_list, start, players):
     available_dominoes = []
     for counter in range(start, start + players):
-        if dominoes_list[counter]:
+        if counter < len(dominoes_list):
             available_dominoes.append(dominoes_list[counter].number)
     available_dominoes.sort()
     return available_dominoes

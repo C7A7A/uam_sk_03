@@ -2,7 +2,6 @@
 
 from helper_methods_communication import *
 from helper_methods_client import *
-from Board import Board
 import socket
 
 HOST = '127.0.0.1'
@@ -19,7 +18,7 @@ print(response)
 send(client_socket, 'LOGIN 452648')
 
 available_choices = parse(receive(client_socket))
-client_board = Board(200, 200)
+x = 1
 
 run = True
 while run:
@@ -37,11 +36,12 @@ while run:
         elif message == 'ROUND':
             available_choices = handle_round_choice(data)
         elif message == 'YOUR MOVE':
-            print('MOVE 1 0 0')
-            send(client_socket, 'MOVE 1 0 0')
+            print('MOVE ' + str(x) + ' 0 0')
+            send(client_socket, 'MOVE ' + str(x) + ' 0 0')
+            x += 2
         elif message == 'PLAYER MOVE':
             print('PLAYER MOVE')
-        elif message == 'STOP':
+        elif message == 'GAME OVER RESULTS':
             run = False
     except socket.error as e:
         print(e)
