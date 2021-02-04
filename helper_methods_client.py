@@ -25,26 +25,18 @@ def parse(data):
 
 
 def handle_start(data):
-    parsed_string = data.split(' ')
-    parsed_string[-1] = parsed_string[-1].strip()
-    del(parsed_string[0:6])
-    # print(parsed_string)
-    return parsed_string
+    del(data[0:6])
+    return data
 
 
 def handle_player_choice(data):
-    parsed_string = data.split(' ')
-    parsed_string[-1] = parsed_string[-1].strip()
-    # print(parsed_string[3])
-    return parsed_string[3]
+    return data[3]
 
 
 def handle_round_choice(data):
-    parsed_string = data.split(' ')
-    parsed_string[-1] = parsed_string[-1].strip()
-    del(parsed_string[0])
+    del(data[0])
     available_dominoes = []
-    for i in range(len(parsed_string)):
-        available_dominoes.append(parsed_string[i])
+    for i in range(len(data)):
+        available_dominoes.append(data[i])
     # print(available_dominoes)
     return available_dominoes

@@ -6,7 +6,7 @@ import socket
 from Board import Board
 from Area import Area
 
-HOST = '127.0.0.1'
+HOST = '150.254.76.34'
 PORT = 54321
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,13 +21,14 @@ server_socket.listen(4)
 
 def get_connection_and_login(sock, player_num):
     conn, address = sock.accept()
-    send(conn, 'CONNECT')
+    send(conn, 'CONNECT\n')
     login = receive(conn)
+    login = login.rstrip()
     print(login)
     if validate_login(login):
-        send(conn, 'OK')
+        send(conn, 'OK\n')
     else:
-        send(conn, 'ERROR')
+        send(conn, 'ERROR\n')
         return
     players_login[player_num] = login.replace('LOGIN ', '')
     return conn
@@ -35,20 +36,21 @@ def get_connection_and_login(sock, player_num):
 
 def message_start(conn, player_num):
     start_data = 'START ' + str(player_num) + get_players_order_string(players_order) + \
-                 get_dominoes_order_string(available_dominoes)
+                 get_dominoes_order_string(available_dominoes) + '\n'
     print(start_data)
     send(conn, start_data)
 
 
 def message_choice(conn):
     print('YOUR CHOICE')
-    send(conn, 'YOUR CHOICE')
+    send(conn, 'YOUR CHOICE\n')
     choice = receive(conn)
+    choice = choice.rstrip()
     print(choice)
     if validate_choice(choice):
-        send(conn, 'OK')
+        send(conn, 'OK\n')
     else:
-        send(conn, 'ERROR')
+        send(conn, 'ERROR\n')
         return
     choice = choice.replace('CHOOSE ', '')
     return int(choice)
@@ -58,7 +60,7 @@ def message_choice_player(player_num, choice, connections):
     print('PLAYER CHOICE ' + str(player_num) + ' ' + str(choice))
     for counter in range(len(connections)):
         if player_num != (counter + 1):
-            send(connections[counter], 'PLAYER CHOICE ' + str(player_num) + ' ' + str(choice))
+            send(connections[counter], 'PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
 
 
 def handle_choice(player_num):
@@ -72,18 +74,20 @@ def message_round(conn, dominoes):
     for domino_number in range(len(dominoes)):
         string += ' '
         string += str(dominoes[domino_number])
+    string += '\n'
     print('ROUND' + string)
     send(conn, 'ROUND' + string)
 
 
 def message_move(conn):
     print('YOUR MOVE')
-    send(conn, 'YOUR MOVE')
+    send(conn, 'YOUR MOVE\n')
     move = receive(conn)
+    move = move.rstrip()
     if validate_move(move):
-        send(conn, 'OK')
+        send(conn, 'OK\n')
     else:
-        send(conn, 'ERROR')
+        send(conn, 'ERROR\n')
         return
     move = move.replace('MOVE ', '')
     move = move.split(' ')
@@ -96,7 +100,7 @@ def message_move_player(player_num, move, connections):
     for counter in range(len(connections)):
         if player_num != (counter + 1):
             send(connections[counter], 'PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' '
-                 + str(move[2]))
+                 + str(move[2]) + '\n')
 
 
 def handle_move(player_num):
@@ -260,6 +264,7 @@ string = ''
 for player in range(players_number):
     string += str(players_login[points[player][0]]) + ' ' + str(points[player][1]) + ' '
 string = string[:-1]
+string += '\n'
 
 for player in range(players_number):
     send(connection_list[player], 'GAME OVER RESULTS ' + string)

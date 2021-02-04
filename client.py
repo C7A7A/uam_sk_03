@@ -4,8 +4,12 @@ from helper_methods_communication import *
 from helper_methods_client import *
 import socket
 
-HOST = 'localhost'
-PORT = 54321
+# HOST = 'grasieci.adiantek.ovh'
+# PORT = 8081
+# HOST = '150.254.76.34'
+# PORT = 54321
+HOST = '150.254.76.34'
+PORT = 5005
 client_socket = socket.socket()
 
 try:
@@ -15,7 +19,7 @@ except socket.error as e:
 
 response = receive(client_socket)
 print(response)
-send(client_socket, 'LOGIN 452648\n')
+send(client_socket, 'LOGIN XD\n')
 
 available_choices = []
 x = 1
@@ -25,36 +29,37 @@ while run:
     # print('Available choices: ', available_choices)
     try:
         data = receive(client_socket)
-        message = parse(data)
-        if message == 'OK':
-            continue
-            # print(message)
-        elif message == 'ERROR':
-            continue
-            # print(message)
-        elif message == 'YOUR CHOICE':
-            # print('CHOOSE ' + str(available_choices[0]))
-            send(client_socket, 'CHOOSE ' + str(available_choices[0]) + '\n')
-        elif message == 'PLAYER CHOICE':
-            domino_taken = handle_player_choice(data)
-            # print('Remove: ', domino_taken)
-            available_choices.remove(str(domino_taken))
-        elif message == 'ROUND':
-            available_choices = handle_round_choice(data)
-        elif message == 'YOUR MOVE':
-            # print('MOVE ' + str(x) + ' 0 0')
-            send(client_socket, 'MOVE ' + str(x) + ' 0 0\n')
-            x += 2
-        elif message == 'PLAYER MOVE':
-            continue
-            # print(message)
-        elif message == 'START':
-            available_choices = handle_start(data)
-        elif message == 'GAME OVER RESULTS':
-            run = False
-        elif message == 'UNKNOWN':
-            continue
-            # print(message)
+        parsed_data = data.splitlines()
+        # print(parsed_data)
+
+        for message in range(len(parsed_data)):
+            parsed_data[message] = parsed_data[message].split(' ')
+        print(parsed_data)
+
+        for message in range(len(parsed_data)):
+            if parsed_data[message][0] == 'OK':
+                continue
+            elif parsed_data[message][0] == 'ROUND':
+                available_choices = handle_round_choice(parsed_data[message])
+            elif parsed_data[message][0] == 'START':
+                available_choices = handle_start(parsed_data[message])
+            elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'CHOICE':
+                print('CHOOSE ' + str(available_choices[0]))
+                send(client_socket, 'CHOOSE ' + str(available_choices[0]) + '\n')
+            elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'CHOICE':
+                domino_taken = handle_player_choice(parsed_data[message])
+                # print('Remove: ', domino_taken)
+                available_choices.remove(str(domino_taken))
+            elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'MOVE':
+                print('MOVE ' + str(x) + ' 0 0')
+                send(client_socket, 'MOVE ' + str(x) + ' 0 0\n')
+                x += 2
+            elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'MOVE':
+                continue
+            elif parsed_data[message][0] == 'ERROR':
+                continue
+            elif parsed_data[message][0] == 'GAME':
+                run = False
     except socket.error as e:
         print(e)
 
