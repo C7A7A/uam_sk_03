@@ -133,7 +133,7 @@ def count_points(board):
     points += count_area_type(bog)
     points += count_area_type(water)
     points += count_area_type(mine)
-    print(points)
+    # print(points)
     return points
 
 
@@ -175,7 +175,7 @@ def count_area_type(area_type):
     pts = 0
     for area in range(len(area_type)):
         pts += (area_type[area].crowns * area_type[area].dominoes)
-    print('points: ', pts)
+    # print('points: ', pts)
     return pts
 
 
