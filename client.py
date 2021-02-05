@@ -7,9 +7,10 @@ import socket
 # HOST = 'grasieci.adiantek.ovh'
 # PORT = 8081
 # HOST = '150.254.76.34'
-# PORT = 54321
-HOST = '150.254.76.34'
-PORT = 5005
+
+HOST = 'localhost'
+PORT = 54321
+
 client_socket = socket.socket()
 
 try:
@@ -46,6 +47,7 @@ while run:
             elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'CHOICE':
                 print('CHOOSE ' + str(available_choices[0]))
                 send(client_socket, 'CHOOSE ' + str(available_choices[0]) + '\n')
+                # send(client_socket, 'CHOOSE ' + '-1' + '\n')
             elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'CHOICE':
                 domino_taken = handle_player_choice(parsed_data[message])
                 # print('Remove: ', domino_taken)
@@ -58,9 +60,9 @@ while run:
                 continue
             elif parsed_data[message][0] == 'ERROR':
                 continue
-            elif parsed_data[message][0] == 'GAME':
+            else:
                 run = False
-    except socket.error as e:
+    except socket.time as e:
         print(e)
 
 client_socket.close()

@@ -6,8 +6,11 @@ import socket
 from Board import Board
 from Area import Area
 
-HOST = '150.254.76.34'
+# HOST = '150.254.79.170'
+HOST = 'localhost'
 PORT = 54321
+
+text_file = open('output.txt', 'w')
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -29,7 +32,11 @@ def get_connection_and_login(sock, player_num):
         send(conn, 'OK\n')
     else:
         send(conn, 'ERROR\n')
-        return
+        players_errors[player_num - 1] += 1
+        if players_errors[player_num - 1] > 100:
+            close_connection(player_num - 1)
+            return
+        get_connection_and_login(sock, player_num)
     players_login[player_num] = login.replace('LOGIN ', '')
     return conn
 
@@ -37,21 +44,30 @@ def get_connection_and_login(sock, player_num):
 def message_start(conn, player_num):
     start_data = 'START ' + str(player_num) + get_players_order_string(players_order) + \
                  get_dominoes_order_string(available_dominoes) + '\n'
+    text_file.write(start_data)
     print(start_data)
     send(conn, start_data)
 
 
-def message_choice(conn):
+def message_choice(conn, player_num):
     print('YOUR CHOICE')
+    text_file.write('YOUR CHOICE\n')
+
     send(conn, 'YOUR CHOICE\n')
+
     choice = receive(conn)
+    text_file.write(choice)
     choice = choice.rstrip()
     print(choice)
+
     if validate_choice(choice):
         send(conn, 'OK\n')
     else:
         send(conn, 'ERROR\n')
-        return
+        players_errors[player_num - 1] += 1
+        if players_errors[player_num - 1] > 100:
+            print('errors.count > 100')
+        message_choice(conn, player_num)
     choice = choice.replace('CHOOSE ', '')
     return int(choice)
 
@@ -60,11 +76,14 @@ def message_choice_player(player_num, choice, connections):
     print('PLAYER CHOICE ' + str(player_num) + ' ' + str(choice))
     for counter in range(len(connections)):
         if player_num != (counter + 1):
+            text_file.write('PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
             send(connections[counter], 'PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
 
 
 def handle_choice(player_num):
-    choice = message_choice(connection_list[player_num - 1])
+    choice = message_choice(connection_list[player_num - 1], player_num)
+    if choice == -1:
+        return
     dominoes_choices[player_num] = choice
     message_choice_player(player_num, choice, connection_list)
 
@@ -75,20 +94,27 @@ def message_round(conn, dominoes):
         string += ' '
         string += str(dominoes[domino_number])
     string += '\n'
+    text_file.write('ROUND' + string)
     print('ROUND' + string)
     send(conn, 'ROUND' + string)
 
 
-def message_move(conn):
+def message_move(conn, player_num):
+    text_file.write('YOUR MOVE\n')
     print('YOUR MOVE')
     send(conn, 'YOUR MOVE\n')
     move = receive(conn)
+    text_file.write(move)
     move = move.rstrip()
     if validate_move(move):
         send(conn, 'OK\n')
     else:
         send(conn, 'ERROR\n')
-        return
+        players_errors[player_num - 1] += 1
+        if players_errors[player_num - 1] > 100:
+            close_connection(player_num - 1)
+            return
+        message_move(conn, player_num)
     move = move.replace('MOVE ', '')
     move = move.split(' ')
     print(move)
@@ -99,12 +125,12 @@ def message_move_player(player_num, move, connections):
     print('PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]))
     for counter in range(len(connections)):
         if player_num != (counter + 1):
-            send(connections[counter], 'PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' '
-                 + str(move[2]) + '\n')
+            text_file.write('PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]) + '\n')
+            send(connections[counter], 'PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]) + '\n')
 
 
 def handle_move(player_num):
-    move = message_move(connection_list[player_num - 1])
+    move = message_move(connection_list[player_num - 1], player_num)
     domino_choice = dominoes_choices[player_num]
     domino = next((x for x in dominoes_list if x.number == domino_choice), None)
     player_boards[player_num - 1].update_board(int(move[0]), int(move[1]), int(move[2]), domino)
@@ -183,6 +209,11 @@ def count_area_type(area_type):
     return pts
 
 
+def close_connection(player_num):
+    connection_list[player_num].close()
+    global players_number
+
+
 dominoes_list = create_and_shuffle_dominoes_list()
 dominoes_choices = {}
 domino_counter = 0
@@ -199,6 +230,7 @@ player_boards = []
 players_number = len(connection_list)
 players_order = [*range(1, players_number + 1)]
 players_order = shuffle_players(players_order)
+players_errors = [0] * players_number
 
 available_dominoes = get_available_dominoes(dominoes_list, 0, players_number)
 
@@ -226,8 +258,8 @@ for game_round in range(12):
         for player in range(len(sorted_dominoes_choices)):
             players_order[player] = sorted_dominoes_choices[player][0]
         # print('Players order: ', players_order)
-        domino_counter += players_number
-        available_dominoes = get_available_dominoes(dominoes_list, domino_counter, players_number)
+        domino_counter += 4
+        available_dominoes = get_available_dominoes(dominoes_list, domino_counter, 4)
         # print('Available dominoes: ', available_dominoes)
 
         for player in range(players_number):
@@ -243,7 +275,7 @@ for game_round in range(12):
             elif players_order[player] == 4:
                 handle_move(4)
 
-    except socket.error as e:
+    except socket.timeout as e:
         print(e)
 
 for player in range(players_number):
@@ -267,7 +299,10 @@ string = string[:-1]
 string += '\n'
 
 for player in range(players_number):
+    text_file.write('GAME OVER RESULTS ' + string)
     send(connection_list[player], 'GAME OVER RESULTS ' + string)
     connection_list[player].close()
+
+print('GAME OVER RESULTS ' + string)
 
 server_socket.close()
