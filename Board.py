@@ -8,27 +8,46 @@ class Board:
     def update_board(self, x, y, orientation, domino):
         x = x + 24
         y = y + 24
+        check_second_domino = True
         print('x: ', x, 'y: ', y)
         if x < 0 or x > 49 or y < 0 or y > 49:
+            print('x < 0 or x > 49 or y < 0 or y > 49')
             return False
         if self.board[x][y] == 0:
             if self.board[x + 1][y] != 0 or self.board[x - 1][y] != 0 or self.board[x][y + 1] != 0 or self.board[x][y - 1] != 0:
-                if orientation == 0:
+                check_second_domino = False
+            if orientation == 0:
+                if check_second_domino:
+                    if self.board[x + 2][y] != 0 or self.board[x + 1][y - 1] != 0 or self.board[x + 1][y + 1] != 0:
+                        check_second_domino = False
+                if not check_second_domino:
                     if self.board[x + 1][y] == 0:
                         self.board[x][y] = domino.type_1 + str(domino.crowns_1)
                         self.board[x + 1][y] = domino.type_2 + str(domino.crowns_2)
                         return True
-                elif orientation == 90:
-                    if self.board[x][y + 1] == 0:
+            elif orientation == 90:
+                if check_second_domino:
+                    if self.board[x + 1][y + 1] != 0 or self.board[x][y + 2] != 0 or self.board[x - 1][y + 1] != 0:
+                        check_second_domino = False
+                if not check_second_domino:
+                    if self.board[x][y + 1] != 0:
                         self.board[x][y] = domino.type_1 + str(domino.crowns_1)
                         self.board[x][y + 1] = domino.type_2 + str(domino.crowns_2)
                         return True
-                elif orientation == 180:
+            elif orientation == 180:
+                if check_second_domino:
+                    if self.board[x - 2][y] != 0 or self.board[x - 1][y + 1] != 0 or self.board[x - 1][y - 1] != 0:
+                        check_second_domino = False
+                if not check_second_domino:
                     if self.board[x - 1][y] == 0:
                         self.board[x][y] = domino.type_1 + str(domino.crowns_1)
                         self.board[x - 1][y] = domino.type_2 + str(domino.crowns_2)
                         return True
-                elif orientation == 270:
+            elif orientation == 270:
+                if check_second_domino:
+                    if self.board[x][y - 2] != 0 or self.board[x + 1][y - 1] != 0 or self.board[x - 1][y - 1] != 0:
+                        check_second_domino = False
+                if not check_second_domino:
                     if self.board[x][y - 1] == 0:
                         self.board[x][y] = domino.type_1 + str(domino.crowns_1)
                         self.board[x][y - 1] = domino.type_2 + str(domino.crowns_2)
