@@ -142,7 +142,7 @@ def count_points(board):
     points = 0
     for x in range(len(board)):
         for y in range(len(board[x])):
-            if board[x][y] != 0 and board[x][y] != 'CASTLE':
+            if board[x][y] != 0 and board[x][y] != 'CA':
                 domino_type, crowns = parse_domino(board[x][y])
                 if domino_type == 'f':
                     sort_dominoes_by_area_type(forest, x, y, crowns)
@@ -157,6 +157,24 @@ def count_points(board):
                 elif domino_type == 'm':
                     sort_dominoes_by_area_type(mine, x, y, crowns)
 
+    print('forest')
+    for i in range(len(forest)):
+        print(forest[i].coordinates)
+    print('grass')
+    for i in range(len(grass)):
+        print(grass[i].coordinates)
+    print('sand')
+    for i in range(len(sand)):
+        print(sand[i].coordinates)
+    print('bog')
+    for i in range(len(bog)):
+        print(bog[i].coordinates)
+    print('water')
+    for i in range(len(water)):
+        print(water[i].coordinates)
+    print('mine')
+    for i in range(len(mine)):
+        print(mine[i].coordinates)
     points += count_area_type(forest)
     points += count_area_type(grass)
     points += count_area_type(sand)
@@ -182,9 +200,11 @@ def sort_dominoes_by_area_type(area_type, x, y, crowns):
         for area in range(len(area_type)):
             for domino in range(len(area_type[area].coordinates)):
                 coordinates = area_type[area].coordinates[domino]
-                # SPRAWDŹ LEWO
+                # SPRAWDŹ LEWO -> GÓRĘ
                 if (x - 1) == coordinates[0] and y == coordinates[1]:
                     area_type[area].add_domino(x, y, crowns)
+                    if x == coordinates[0] and (y - 1) == coordinates[1]:
+                        area_type[area].add_domino(x, (y - 1), crowns)
                     stop = True
                     break
                 # SPRAWDŹ GÓRĘ
@@ -260,7 +280,7 @@ for game_round in range(12):
         # print('Players order: ', players_order)
         domino_counter += 4
         available_dominoes = get_available_dominoes(dominoes_list, domino_counter, 4)
-        # print('Available dominoes: ', available_dominoes)
+        print('Available dominoes: ', available_dominoes)
 
         for player in range(players_number):
             message_round(connection_list[player], available_dominoes)

@@ -3,7 +3,7 @@ class Board:
         self.size_x = size_x
         self.size_y = size_y
         self.board = [[0 for size_x in range(size_x)] for size_y in range(size_y)]
-        self.board[24][24] = 'CASTLE'
+        self.board[24][24] = 'CA'
 
     def update_board(self, x, y, orientation, domino):
         x = x + 24

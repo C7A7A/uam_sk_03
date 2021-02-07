@@ -20,7 +20,7 @@ except socket.error as e:
 
 response = receive(client_socket)
 print(response)
-send(client_socket, 'LOGIN XD\n')
+send(client_socket, 'LOGIN 452648\n')
 
 available_choices = []
 x = 1
