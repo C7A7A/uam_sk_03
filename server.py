@@ -255,7 +255,7 @@ players_errors = [0] * players_number
 available_dominoes = get_available_dominoes(dominoes_list, 0, players_number)
 
 for player in range(players_number):
-    player_boards.append(Board(49, 49))
+    player_boards.append(Board(53, 53))
 
 for player in range(players_number):
     message_start(connection_list[player], player + 1)

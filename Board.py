@@ -3,14 +3,14 @@ class Board:
         self.size_x = size_x
         self.size_y = size_y
         self.board = [[0 for size_x in range(size_x)] for size_y in range(size_y)]
-        self.board[24][24] = 'CA'
+        self.board[26][26] = 'CA'
 
     def update_board(self, x, y, orientation, domino):
-        x = x + 24
-        y = y + 24
+        x = x + 26
+        y = y + 26
         check_second_domino = True
         print('x: ', x, 'y: ', y)
-        if x < 0 or x > 49 or y < 0 or y > 49:
+        if x < 0 or x > 53 or y < 0 or y > 53:
             print('x < 0 or x > 49 or y < 0 or y > 49')
             return False
         if self.board[x][y] == 0:
@@ -52,4 +52,5 @@ class Board:
                         self.board[x][y] = domino.type_1 + str(domino.crowns_1)
                         self.board[x][y - 1] = domino.type_2 + str(domino.crowns_2)
                         return True
+        print('COŚ SIĘ STAŁO ', 'x: ', x, 'y: ', y)
         return False
