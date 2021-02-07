@@ -6,8 +6,8 @@ import socket
 from Board import Board
 from Area import Area
 
-# HOST = '150.254.79.170'
-HOST = 'localhost'
+HOST = '150.254.79.126'
+# HOST = 'localhost'
 PORT = 54321
 
 text_file = open('output.txt', 'w')
@@ -19,7 +19,7 @@ try:
 except socket.error as e:
     print(str(e))
 
-server_socket.listen(4)
+server_socket.listen(1)
 
 
 def get_connection_and_login(sock, player_num):
@@ -65,9 +65,9 @@ def message_choice(conn, player_num):
     else:
         send(conn, 'ERROR\n')
         players_errors[player_num - 1] += 1
-        if players_errors[player_num - 1] > 100:
-            print('errors.count > 100')
-        message_choice(conn, player_num)
+        # if players_errors[player_num - 1] > 100:
+            # print('errors.count > 100')
+        # message_choice(conn, player_num)
     choice = choice.replace('CHOOSE ', '')
     return int(choice)
 
@@ -240,10 +240,10 @@ domino_counter = 0
 players_login = {}
 
 connection_list = [
-    get_connection_and_login(server_socket, 1),
-    get_connection_and_login(server_socket, 2),
-    get_connection_and_login(server_socket, 3),
-    get_connection_and_login(server_socket, 4)
+    get_connection_and_login(server_socket, 1)
+    # get_connection_and_login(server_socket, 2),
+    # get_connection_and_login(server_socket, 3),
+    # get_connection_and_login(server_socket, 4)
 ]
 
 player_boards = []
@@ -252,7 +252,7 @@ players_order = [*range(1, players_number + 1)]
 players_order = shuffle_players(players_order)
 players_errors = [0] * players_number
 
-available_dominoes = get_available_dominoes(dominoes_list, 0, players_number)
+available_dominoes = get_available_dominoes(dominoes_list, 0)
 
 for player in range(players_number):
     player_boards.append(Board(53, 53))
@@ -279,7 +279,7 @@ for game_round in range(12):
             players_order[player] = sorted_dominoes_choices[player][0]
         # print('Players order: ', players_order)
         domino_counter += 4
-        available_dominoes = get_available_dominoes(dominoes_list, domino_counter, 4)
+        available_dominoes = get_available_dominoes(dominoes_list, domino_counter)
         print('Available dominoes: ', available_dominoes)
 
         for player in range(players_number):
