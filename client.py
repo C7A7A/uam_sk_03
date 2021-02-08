@@ -5,8 +5,8 @@ from helper_methods_client import *
 import socket
 
 # HOST = 'grasieci.adiantek.ovh'
-# PORT = 5006
-# HOST = '150.254.79.172'
+# PORT = 8081
+# HOST = '150.254.79.108'
 
 HOST = 'localhost'
 PORT = 54321
@@ -46,7 +46,8 @@ while run:
                 available_choices = handle_start(parsed_data[message])
             elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'CHOICE':
                 # print('CHOOSE ' + str(available_choices[0]))
-                send(client_socket, 'CHOOSE ' + str(available_choices[0]) + '\n')
+                len_available_choices = len(available_choices)
+                send(client_socket, 'CHOOSE ' + str(available_choices[len_available_choices - 1]) + '\n')
                 # send(client_socket, 'CHOOSE ' + '-1' + '\n')
             elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'CHOICE':
                 domino_taken = handle_player_choice(parsed_data[message])
