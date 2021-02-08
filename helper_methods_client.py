@@ -25,7 +25,7 @@ def parse(data):
 
 
 def handle_start(data):
-    del(data[0:3])
+    del(data[0:6])
     return data
 
 

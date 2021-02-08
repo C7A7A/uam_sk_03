@@ -6,8 +6,8 @@ import socket
 from Board import Board
 from Area import Area
 
-HOST = '150.254.79.126'
-# HOST = 'localhost'
+# HOST = '150.254.79.126'
+HOST = 'localhost'
 PORT = 54321
 
 text_file = open('output.txt', 'w')
@@ -19,15 +19,17 @@ try:
 except socket.error as e:
     print(str(e))
 
-server_socket.listen(1)
+server_socket.listen(4)
 
 
 def get_connection_and_login(sock, player_num):
     conn, address = sock.accept()
     send(conn, 'CONNECT\n')
+    text_file.write('CONNECT')
     login = receive(conn)
     login = login.rstrip()
     print(login)
+    text_file.write(login)
     if validate_login(login):
         send(conn, 'OK\n')
     else:
@@ -50,38 +52,43 @@ def message_start(conn, player_num):
 
 
 def message_choice(conn, player_num):
-    print('YOUR CHOICE')
-    text_file.write('YOUR CHOICE\n')
+    run = True
+    while run:
+        print('YOUR CHOICE')
+        text_file.write('YOUR CHOICE\n')
 
-    send(conn, 'YOUR CHOICE\n')
+        send(conn, 'YOUR CHOICE\n')
 
-    choice = receive(conn)
-    text_file.write(choice)
-    choice = choice.rstrip()
-    print(choice)
+        choice = receive(conn)
+        text_file.write(choice)
+        choice = choice.rstrip()
+        print(choice)
 
-    if validate_choice(choice):
-        send(conn, 'OK\n')
-    else:
-        send(conn, 'ERROR\n')
-        players_errors[player_num - 1] += 1
-        # if players_errors[player_num - 1] > 100:
-            # print('errors.count > 100')
-        # message_choice(conn, player_num)
-    choice = choice.replace('CHOOSE ', '')
+        if validate_choice(choice):
+            send(conn, 'OK\n')
+            choice = choice.replace('CHOOSE ', '')
+            run = False
+        else:
+            send(conn, 'ERROR\n')
+            players_errors[player_num - 1] += 1
+            if players_errors[player_num - 1] > 100:
+                close_connection(player_num - 1)
+                choice = -1
+                run = False
     return int(choice)
 
 
 def message_choice_player(player_num, choice, connections):
     print('PLAYER CHOICE ' + str(player_num) + ' ' + str(choice))
     for counter in range(len(connections)):
-        if player_num != (counter + 1):
+        key = list(connections)[counter]
+        if player_num != key and key not in players_disconnected:
             text_file.write('PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
-            send(connections[counter], 'PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
+            send(connections[key], 'PLAYER CHOICE ' + str(player_num) + ' ' + str(choice) + '\n')
 
 
 def handle_choice(player_num):
-    choice = message_choice(connection_list[player_num - 1], player_num)
+    choice = message_choice(connection_list[player_num], player_num)
     if choice == -1:
         return
     dominoes_choices[player_num] = choice
@@ -100,23 +107,26 @@ def message_round(conn, dominoes):
 
 
 def message_move(conn, player_num):
-    text_file.write('YOUR MOVE\n')
-    print('YOUR MOVE')
-    send(conn, 'YOUR MOVE\n')
-    move = receive(conn)
-    text_file.write(move)
-    move = move.rstrip()
-    if validate_move(move):
-        send(conn, 'OK\n')
-    else:
-        send(conn, 'ERROR\n')
-        players_errors[player_num - 1] += 1
-        if players_errors[player_num - 1] > 100:
-            close_connection(player_num - 1)
-            return
-        message_move(conn, player_num)
-    move = move.replace('MOVE ', '')
-    move = move.split(' ')
+    run = True
+    while run:
+        text_file.write('YOUR MOVE\n')
+        print('YOUR MOVE')
+        send(conn, 'YOUR MOVE\n')
+        move = receive(conn)
+        text_file.write(move)
+        move = move.rstrip()
+        if validate_move(move):
+            send(conn, 'OK\n')
+            move = move.replace('MOVE ', '')
+            move = move.split(' ')
+            run = False
+        else:
+            send(conn, 'ERROR\n')
+            players_errors[player_num - 1] += 1
+            if players_errors[player_num - 1] > 100:
+                close_connection(player_num - 1)
+                move = -1
+                run = False
     print(move)
     return move
 
@@ -124,16 +134,19 @@ def message_move(conn, player_num):
 def message_move_player(player_num, move, connections):
     print('PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]))
     for counter in range(len(connections)):
-        if player_num != (counter + 1):
+        key = list(connections)[counter]
+        if player_num != key and key not in players_disconnected:
             text_file.write('PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]) + '\n')
-            send(connections[counter], 'PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]) + '\n')
+            send(connections[key], 'PLAYER MOVE ' + str(player_num) + ' ' + str(move[0]) + ' ' + str(move[1]) + ' ' + str(move[2]) + '\n')
 
 
 def handle_move(player_num):
-    move = message_move(connection_list[player_num - 1], player_num)
+    move = message_move(connection_list[player_num], player_num)
+    if move == -1:
+        return
     domino_choice = dominoes_choices[player_num]
     domino = next((x for x in dominoes_list if x.number == domino_choice), None)
-    player_boards[player_num - 1].update_board(int(move[0]), int(move[1]), int(move[2]), domino)
+    player_boards[player_num].update_board(int(move[0]), int(move[1]), int(move[2]), domino)
     message_move_player(player_num, move, connection_list)
 
 
@@ -230,8 +243,22 @@ def count_area_type(area_type):
 
 
 def close_connection(player_num):
-    connection_list[player_num].close()
+    connection_list[player_num + 1].close()
+    # print(connection_list)
     global players_number
+    players_number -= 1
+
+    for index in range(len(players_order)):
+        if (player_num + 1) == players_order[index]:
+            players_order[index] = 0
+
+    del connection_list[player_num + 1]
+    del player_boards[player_num + 1]
+    # del players_errors[player_num]
+    del players_login[player_num + 1]
+    if (player_num + 1) in dominoes_choices:
+        del dominoes_choices[player_num + 1]
+    players_disconnected.append(player_num + 1)
 
 
 dominoes_list = create_and_shuffle_dominoes_list()
@@ -239,14 +266,15 @@ dominoes_choices = {}
 domino_counter = 0
 players_login = {}
 
-connection_list = [
-    get_connection_and_login(server_socket, 1)
-    # get_connection_and_login(server_socket, 2),
-    # get_connection_and_login(server_socket, 3),
-    # get_connection_and_login(server_socket, 4)
-]
+connection_list = {
+    1: get_connection_and_login(server_socket, 1),
+    2: get_connection_and_login(server_socket, 2),
+    3: get_connection_and_login(server_socket, 3),
+    4: get_connection_and_login(server_socket, 4)
+}
 
-player_boards = []
+player_boards = {}
+players_disconnected = []
 players_number = len(connection_list)
 players_order = [*range(1, players_number + 1)]
 players_order = shuffle_players(players_order)
@@ -255,10 +283,10 @@ players_errors = [0] * players_number
 available_dominoes = get_available_dominoes(dominoes_list, 0)
 
 for player in range(players_number):
-    player_boards.append(Board(53, 53))
+    player_boards[player + 1] = Board(53, 53)
 
 for player in range(players_number):
-    message_start(connection_list[player], player + 1)
+    message_start(connection_list[player + 1], player + 1)
 
 for game_round in range(12):
     try:
@@ -275,7 +303,7 @@ for game_round in range(12):
         # print('Dominoes choices: ', dominoes_choices)
         sorted_dominoes_choices = sorted(dominoes_choices.items(), key=lambda x: x[1])
         # print('Sorted dominoes choices: ', sorted_dominoes_choices)
-        for player in range(len(sorted_dominoes_choices)):
+        for player in range(players_number):
             players_order[player] = sorted_dominoes_choices[player][0]
         # print('Players order: ', players_order)
         domino_counter += 4
@@ -283,7 +311,8 @@ for game_round in range(12):
         print('Available dominoes: ', available_dominoes)
 
         for player in range(players_number):
-            message_round(connection_list[player], available_dominoes)
+            key = list(connection_list)[player]
+            message_round(connection_list[key], available_dominoes)
 
         for player in range(players_number):
             if players_order[player] == 1:
@@ -299,29 +328,36 @@ for game_round in range(12):
         print(e)
 
 for player in range(players_number):
-    for i in range(len(player_boards[player].board)):
-        for j in range(len(player_boards[player].board[i])):
-            print(player_boards[player].board[i][j], end=' ')
+    key = list(player_boards)[player]
+    for i in range(len(player_boards[key].board)):
+        for j in range(len(player_boards[key].board[i])):
+            print(player_boards[key].board[i][j], end=' ')
         print()
     print()
 
 points = {}
 
 for player in range(players_number):
-    points[player + 1] = (count_points(player_boards[player].board))
+    key = list(player_boards)[player]
+    points[key] = (count_points(player_boards[key].board))
 
 points = sorted(points.items(), key=lambda x: x[1], reverse=True)
 
 string = ''
 for player in range(players_number):
-    string += str(players_login[points[player][0]]) + ' ' + str(points[player][1]) + ' '
+    key = list(points)[player]
+    string += str(players_login[key[0]])
+    string += ' '
+    string += str(key[1])
+    string += ' '
 string = string[:-1]
 string += '\n'
 
 for player in range(players_number):
+    key = list(connection_list)[player]
     text_file.write('GAME OVER RESULTS ' + string)
-    send(connection_list[player], 'GAME OVER RESULTS ' + string)
-    connection_list[player].close()
+    send(connection_list[key], 'GAME OVER RESULTS ' + string)
+    connection_list[key].close()
 
 print('GAME OVER RESULTS ' + string)
 

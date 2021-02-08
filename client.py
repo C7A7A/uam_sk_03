@@ -5,8 +5,8 @@ from helper_methods_client import *
 import socket
 
 # HOST = 'grasieci.adiantek.ovh'
-# PORT = 8081
-# HOST = '150.254.76.34'
+# PORT = 5006
+# HOST = '150.254.79.172'
 
 HOST = 'localhost'
 PORT = 54321
@@ -45,7 +45,7 @@ while run:
             elif parsed_data[message][0] == 'START':
                 available_choices = handle_start(parsed_data[message])
             elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'CHOICE':
-                print('CHOOSE ' + str(available_choices[0]))
+                # print('CHOOSE ' + str(available_choices[0]))
                 send(client_socket, 'CHOOSE ' + str(available_choices[0]) + '\n')
                 # send(client_socket, 'CHOOSE ' + '-1' + '\n')
             elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'CHOICE':
@@ -54,6 +54,7 @@ while run:
                 available_choices.remove(str(domino_taken))
             elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'MOVE':
                 print('MOVE ' + str(x) + ' 0 0')
+                # send(client_socket, 'MOVE ' + 'ssijmikutasakurewko\n')
                 send(client_socket, 'MOVE ' + str(x) + ' 0 0\n')
                 x += 2
             elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'MOVE':

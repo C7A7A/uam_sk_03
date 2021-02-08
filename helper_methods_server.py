@@ -35,12 +35,13 @@ def validate_move(move):
     if not move:
         return False
     parsed_move = move.split(' ')
-    if try_parse_to_int(parsed_move[0]) and try_parse_to_int(parsed_move[1]) and try_parse_to_int(parsed_move[2]):
-        if int(parsed_move[0]) not in range(-100, 100) or int(parsed_move[1]) not in range(-100, 100):
-            return False
-        if int(parsed_move[2]) not in [0, 90, 180, 270]:
-            return False
-        return True
+    if len(parsed_move) == 3:
+        if try_parse_to_int(parsed_move[0]) or try_parse_to_int(parsed_move[1]) or try_parse_to_int(parsed_move[2]):
+            if int(parsed_move[0]) not in range(-100, 100) or int(parsed_move[1]) not in range(-100, 100):
+                return False
+            if int(parsed_move[2]) not in [0, 90, 180, 270]:
+                return False
+            return True
     return False
 
 
