@@ -54,6 +54,7 @@ def message_start(conn, player_num):
 
 def message_choice(conn, player_num):
     run = True
+    choice = -1
     while run:
         print('YOUR CHOICE')
         text_file.write('YOUR CHOICE\n')
@@ -116,6 +117,7 @@ def message_round(conn, dominoes):
 
 def message_move(conn, player_num):
     run = True
+    move = -1
     while run:
         text_file.write('YOUR MOVE\n')
         print('YOUR MOVE')
