@@ -13,7 +13,9 @@ def validate_login(login):
     return True
 
 
-def validate_choice(choice):
+def validate_choice(choice, raw_choice):
+    if len(raw_choice) > 250:
+        return False
     if 'CHOOSE ' not in choice:
         return False
     choice = choice.replace('CHOOSE ', '')
@@ -22,13 +24,16 @@ def validate_choice(choice):
     parsed_choice = choice.split(' ')
     print(parsed_choice)
     print(parsed_choice[0])
-    if try_parse_to_int(parsed_choice[0]):
-        if int(parsed_choice[0]) in range(1, 49):
-            return True
+    if len(parsed_choice) == 1:
+        if try_parse_to_int(parsed_choice[0]):
+            if int(parsed_choice[0]) in range(1, 49):
+                return True
     return False
 
 
-def validate_move(move):
+def validate_move(move, raw_move):
+    if len(raw_move) > 250:
+        return False
     if 'MOVE ' not in move:
         return False
     move = move.replace('MOVE ', '')

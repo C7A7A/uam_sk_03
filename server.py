@@ -24,6 +24,7 @@ server_socket.listen(4)
 
 def get_connection_and_login(sock, player_num):
     conn, address = sock.accept()
+    conn.settimeout(2)
     send(conn, 'CONNECT\n')
     text_file.write('CONNECT')
     login = receive(conn)
@@ -59,22 +60,29 @@ def message_choice(conn, player_num):
 
         send(conn, 'YOUR CHOICE\n')
 
-        choice = receive(conn)
-        text_file.write(choice)
-        choice = choice.rstrip()
-        print(choice)
+        try:
+            choice = receive(conn)
+            text_file.write(str(choice))
+            raw_choice = choice
+            choice = choice.rstrip()
+            print(choice)
 
-        if validate_choice(choice):
-            send(conn, 'OK\n')
-            choice = choice.replace('CHOOSE ', '')
-            run = False
-        else:
-            send(conn, 'ERROR\n')
-            players_errors[player_num - 1] += 1
-            if players_errors[player_num - 1] > 100:
-                close_connection(player_num - 1)
-                choice = -1
+            if validate_choice(choice, raw_choice):
+                send(conn, 'OK\n')
+                choice = choice.replace('CHOOSE ', '')
                 run = False
+            else:
+                send(conn, 'ERROR\n')
+                players_errors[player_num - 1] += 1
+                if players_errors[player_num - 1] > 100:
+                    close_connection(player_num - 1)
+                    choice = -1
+                    run = False
+        except Exception as e:
+            print(e)
+            close_connection(player_num - 1)
+            choice = -1
+            run = False
     return int(choice)
 
 
@@ -112,21 +120,31 @@ def message_move(conn, player_num):
         text_file.write('YOUR MOVE\n')
         print('YOUR MOVE')
         send(conn, 'YOUR MOVE\n')
-        move = receive(conn)
-        text_file.write(move)
-        move = move.rstrip()
-        if validate_move(move):
-            send(conn, 'OK\n')
-            move = move.replace('MOVE ', '')
-            move = move.split(' ')
-            run = False
-        else:
-            send(conn, 'ERROR\n')
-            players_errors[player_num - 1] += 1
-            if players_errors[player_num - 1] > 100:
-                close_connection(player_num - 1)
-                move = -1
+
+        try:
+            move = receive(conn)
+            raw_move = move
+            text_file.write(move)
+            move = move.rstrip()
+
+            if validate_move(move, raw_move):
+                send(conn, 'OK\n')
+                move = move.replace('MOVE ', '')
+                move = move.split(' ')
                 run = False
+            else:
+                send(conn, 'ERROR\n')
+                players_errors[player_num - 1] += 1
+                if players_errors[player_num - 1] > 100:
+                    close_connection(player_num - 1)
+                    move = -1
+                    run = False
+        except Exception as e:
+            print(e)
+            close_connection(player_num - 1)
+            move = -1
+            run = False
+
     print(move)
     return move
 

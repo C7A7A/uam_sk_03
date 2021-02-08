@@ -54,7 +54,7 @@ while run:
                 available_choices.remove(str(domino_taken))
             elif parsed_data[message][0] == 'YOUR' and parsed_data[message][1] == 'MOVE':
                 print('MOVE ' + str(x) + ' 0 0')
-                # send(client_socket, 'MOVE ' + 'ssijmikutasakurewko\n')
+                # send(client_socket, 'MOVE ' + 'losowystringXD\n')
                 send(client_socket, 'MOVE ' + str(x) + ' 0 0\n')
                 x += 2
             elif parsed_data[message][0] == 'PLAYER' and parsed_data[message][1] == 'MOVE':
