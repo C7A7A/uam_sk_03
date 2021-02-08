@@ -5,11 +5,11 @@ from helper_methods_client import *
 import socket
 
 # HOST = 'grasieci.adiantek.ovh'
-# PORT = 5006
-# HOST = '150.254.79.172'
+PORT = 5006
+HOST = '150.254.79.171'
 
-HOST = 'localhost'
-PORT = 54321
+# HOST = 'localhost'
+# PORT = 54321
 
 client_socket = socket.socket()
 

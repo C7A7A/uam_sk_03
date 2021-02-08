@@ -1,0 +1,3 @@
+1. Sprawdzania po stronie serwera czy wybrane przez użytkownika domino jest dostępne
+2. Po wyrzuceniu użytkownika usuwam jego plansze, więc jego punkty nie są wypisane w komunikacie GAME OVER RESULTS
+3. Sprawdzanie 100 błędnych komunikatów pod rząd, sprawdzam czy błędnych komunikatów nie było w sumie 100 dla każdego gracza

@@ -10,7 +10,7 @@ from Area import Area
 HOST = 'localhost'
 PORT = 54321
 
-text_file = open('output.txt', 'w')
+text_file = open('output_2.txt', 'w')
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,11 +26,11 @@ def get_connection_and_login(sock, player_num):
     conn, address = sock.accept()
     conn.settimeout(2)
     send(conn, 'CONNECT\n')
-    text_file.write('CONNECT')
+    text_file.write('CONNECT\n')
     login = receive(conn)
     login = login.rstrip()
     print(login)
-    text_file.write(login)
+    text_file.write(login + '\n')
     if validate_login(login):
         send(conn, 'OK\n')
     else:

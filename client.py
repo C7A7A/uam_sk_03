@@ -5,9 +5,8 @@ from helper_methods_client import *
 import socket
 
 # HOST = 'grasieci.adiantek.ovh'
-# PORT = 8081
-# HOST = '150.254.79.108'
-
+# HOST = '150.254.79.172'
+# PORT = 1234
 HOST = 'localhost'
 PORT = 54321
 
